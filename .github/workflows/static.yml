@@ -2,27 +2,20 @@
 name: Deploy Vue + Vite static content to Pages
 
 on:
-  # Runs on pushes targeting the default branch
   push:
-    branches: ["main"]
-
-  # Allows you to run this workflow manually from the Actions tab
+    branches: [ main ]
   workflow_dispatch:
 
-# Sets permissions of the GITHUB_TOKEN to allow deployment to GitHub Pages
 permissions:
   contents: read
   pages: write
   id-token: write
 
-# Allow only one concurrent deployment, skipping runs queued between the run in-progress and latest queued.
-# However, do NOT cancel in-progress runs as we want to allow these production deployments to complete.
 concurrency:
-  group: "pages"
+  group: pages
   cancel-in-progress: false
 
 jobs:
-  # Build and deploy job
   deploy:
     environment:
       name: github-pages
@@ -35,19 +28,22 @@ jobs:
       - name: Setup pnpm
         uses: pnpm/action-setup@v4
         with:
-          version: 10.33.0 # 和 package.json 中的 packageManager 版本一致
+          version: 10.33.0
 
-      - name: Setup Node.js
+      - name: Setup Node
         uses: actions/setup-node@v4
         with:
-          node-version: 22 # 推荐 LTS 版本，兼容 pnpm 10
-          cache: 'pnpm' # 缓存依赖，加速构建
+          node-version: 22
+          cache: 'pnpm'
 
-      - name: Install dependencies
+      - name: Install
         run: pnpm install
 
       - name: Build
-        run: pnpm run build
+        run: pnpm build
+
+      - name: Fix 404 for GitHub Pages
+        run: cp dist/index.html dist/404.html
 
       - name: Setup Pages
         uses: actions/configure-pages@v5
@@ -55,9 +51,8 @@ jobs:
       - name: Upload artifact
         uses: actions/upload-pages-artifact@v3
         with:
-          # Vite 默认打包输出目录是 dist
           path: './dist'
 
-      - name: Deploy to GitHub Pages
+      - name: Deploy
         id: deployment
         uses: actions/deploy-pages@v5
