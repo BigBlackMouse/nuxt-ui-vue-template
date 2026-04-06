@@ -55,11 +55,15 @@ jobs:
         id: short_sha
         run: echo "SHORT_SHA=$(echo ${{ github.sha }} | cut -c1-7)" >> $GITHUB_OUTPUT
 
+      - name: Get current date
+        id: date
+        run: echo "DATE=$(date +'%Y-%m-%d %H:%M')" >> $GITHUB_OUTPUT
+
       - name: Create Release
         uses: softprops/action-gh-release@v2
         with:
           tag_name: release-${{ github.sha }}
-          name: Release ${{ steps.short_sha.outputs.SHORT_SHA }} - $(date +'%Y-%m-%d %H:%M')
+          name: Release ${{ steps.short_sha.outputs.SHORT_SHA }} - ${{ steps.date.outputs.DATE }}
           body: |
             ## 🎉 Auto Release from main branch
             
