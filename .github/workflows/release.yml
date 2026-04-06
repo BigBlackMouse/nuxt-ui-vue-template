@@ -1,0 +1,81 @@
+name: Create Release
+
+on:
+  push:
+    branches:
+      - main # 每次推送到 main 分支时自动创建 Release
+
+permissions:
+  contents: write # 需要写入权限来创建 Release
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0 # 获取完整的 git 历史记录
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      
+      - name: Enable Corepack
+        run: corepack enable
+
+      - name: Install dependencies
+        run: pnpm install
+
+      - name: Build project
+        run: pnpm run build
+
+      - name: Create ZIP archive
+        run: |
+          cd dist
+          zip -r ../nuxt-ui-vue-template-${{ github.sha }}.zip .
+          cd ..
+
+      - name: Generate Changelog
+        id: changelog
+        run: |
+          PREVIOUS_TAG=$(git describe --tags --abbrev=0 HEAD^ 2>/dev/null || echo "")
+          if [ -z "$PREVIOUS_TAG" ]; then
+            CHANGELOG=$(git log --pretty=format:"* %s (%h)" -10)
+          else
+            CHANGELOG=$(git log --pretty=format:"* %s (%h)" $PREVIOUS_TAG..HEAD)
+          fi
+          echo "CHANGELOG<<EOF" >> $GITHUB_OUTPUT
+          echo "$CHANGELOG" >> $GITHUB_OUTPUT
+          echo "EOF" >> $GITHUB_OUTPUT
+
+      - name: Get short SHA
+        id: short_sha
+        run: echo "SHORT_SHA=$(echo ${{ github.sha }} | cut -c1-7)" >> $GITHUB_OUTPUT
+
+      - name: Create Release
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: release-${{ github.sha }}
+          name: Release ${{ steps.short_sha.outputs.SHORT_SHA }} - $(date +'%Y-%m-%d %H:%M')
+          body: |
+            ## 🎉 Auto Release from main branch
+            
+            **Commit:** ${{ github.sha }}
+            **Author:** ${{ github.actor }}
+            
+            ### 📝 Recent Changes
+            
+            ${{ steps.changelog.outputs.CHANGELOG }}
+            
+            ## 📦 Assets
+            
+            - `nuxt-ui-vue-template-${{ github.sha }}.zip` - Production build
+          files: nuxt-ui-vue-template-${{ github.sha }}.zip
+          draft: false
+          prerelease: false
+          generate_release_notes: true
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
