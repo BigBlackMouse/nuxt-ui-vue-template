@@ -5,8 +5,8 @@ import vueLayouts from 'vite-plugin-vue-layouts'
 import ui from '@nuxt/ui/vite'
 
 // https://vitejs.dev/config/
-export default defineConfig({
-  base: './',
+export default defineConfig(({ mode }) => ({
+  base: mode === 'production' ? '/nuxt-ui-vue-template/' : '/',
   plugins: [
     vueRouter({
       dts: 'src/route-map.d.ts',
@@ -22,4 +22,4 @@ export default defineConfig({
       }
     })
   ]
-})
+}))
