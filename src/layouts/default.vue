@@ -17,6 +17,13 @@ const links = [[{
     open.value = false
   }
 }, {
+  label: 'FullCalendar',
+  icon: 'i-lucide-calendar-days',
+  to: '/fullCalendar',
+  onSelect: () => {
+    open.value = false
+  }
+}, {
   label: 'Inbox',
   icon: 'i-lucide-inbox',
   to: '/inbox',
