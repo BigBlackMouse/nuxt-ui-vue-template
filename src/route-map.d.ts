@@ -48,6 +48,13 @@ declare module 'vue-router/auto-routes' {
       Record<never, never>,
       | never
     >,
+    '/editor': RouteRecordInfo<
+      '/editor',
+      '/editor',
+      Record<never, never>,
+      Record<never, never>,
+      | never
+    >,
     '/fullCalendar': RouteRecordInfo<
       '/fullCalendar',
       '/fullCalendar',
@@ -142,6 +149,12 @@ declare module 'vue-router/auto-routes' {
     'src/pages/customers.vue': {
       routes:
         | '/customers'
+      views:
+        | never
+    }
+    'src/pages/editor.vue': {
+      routes:
+        | '/editor'
       views:
         | never
     }
